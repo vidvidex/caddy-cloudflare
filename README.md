@@ -1,5 +1,7 @@
 # Caddy with Cloudflare DNS provider
 
+[![Build](https://github.com/vidvidex/caddy-cloudflare/actions/workflows/docker-build.yml/badge.svg)](https://github.com/vidvidex/caddy-cloudflare/actions/workflows/docker-build.yml)
+
 This is a Docker image for Caddy with the [Cloudflare DNS provider](https://github.com/caddy-dns/cloudflare/).
 
 The script to rebuild the image is triggered every day to ensure the image is up to date.

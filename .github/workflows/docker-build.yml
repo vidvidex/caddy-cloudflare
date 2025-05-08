@@ -1,4 +1,4 @@
-name: Build and push multi-arch Docker image of Caddy with Cloudflare DNS provider
+name: Build and push Caddy image with Cloudflare DNS provider
 
 on:
   workflow_dispatch:
@@ -24,7 +24,7 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Get latest Caddy builder image digest
-        id: caddy_digest
+        id: caddy_info
         run: |
           DIGEST=$(docker manifest inspect caddy:builder --verbose | jq -r '.[0].Descriptor.digest')
           echo "DIGEST=$DIGEST" >> $GITHUB_ENV
@@ -46,15 +46,6 @@ jobs:
             echo "Base image changed, proceeding with build."
           fi
 
-      - name: Commit updated digest
-        if: env.SKIP_BUILD != 'true'
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions@github.com"
-          git add .caddy_digest
-          git commit -m "Update Caddy image digest"
-          git push
-
       - name: Log in to GitHub Container Registry
         if: env.SKIP_BUILD != 'true'
         uses: docker/login-action@v2
@@ -71,3 +62,20 @@ jobs:
           platforms: linux/amd64,linux/arm64
           tags: ghcr.io/vidvidex/caddy-cloudflare:latest
           file: ./Dockerfile
+
+      - name: Delete old images
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: caddy-cloudflare
+          package-type: 'container'
+          min-versions-to-keep: 10
+          delete-only-untagged-versions: 'true'
+
+      - name: Commit updated digest
+        if: env.SKIP_BUILD != 'true'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions@github.com"
+          git add .caddy_digest
+          git commit -m "Update Caddy image digest"
+          git push
